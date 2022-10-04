@@ -66,9 +66,10 @@ def VideoStreamHandler():
         
 
 VideoThread = threading.Thread(target=VideoStreamHandler, args=())
-VideoThread.start()
 Handler.start()
+VideoThread.start()
 
 while True:
+    # print(Handler.GetDelta('Z'))
     UDP.SendCommand(Handler.GetDelta('Flag'), 0x80 + Handler.GetDelta('X'), 0x80 +
                     Handler.GetDelta('Y'), 0x80 + Handler.GetDelta('Z'), 0x80 + Handler.GetDelta('Rotation'))

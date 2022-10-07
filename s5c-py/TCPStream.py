@@ -26,7 +26,7 @@ class TCPStream:
         ]
         for Packet in LinkPackets:
             self.Socket.send(codecs.decode(Packet, 'hex'))
-            self.Socket.recv(0x4000)
+            self.Socket.recv(106)
 
     def Receive(self, Length: int):
         return self.Socket.recv(Length)

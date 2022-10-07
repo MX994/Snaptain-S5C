@@ -1,56 +1,52 @@
+from pygame import K_LEFT, K_LSHIFT, K_RIGHT, K_SPACE, K_a, K_d, K_f, K_g, K_h, K_s, K_w
 from Controllers.AbstractController import *
-
+import threading
 
 class Keyboard(AbstractController):
     def __init__(self):
         super().__init__()
+        self.Const = 0.5
 
     def start(self):
-        if self.joystick != None:
-            self.joystick.init()
-            self.input_thread = threading.Thread(target=self.__poll, args=())
-            self.input_thread.start()
+        self.input_thread = threading.Thread(target=self.__poll, args=())
+        self.input_thread.start()
 
     def __poll(self):
         while True:
-            if self.killswitch_endtime == None or time.time() >= self.killswitch_endtime:
-                if self.killswitch_endtime != None:
-                    self.killswitch_endtime = None
-                if not (self.joystick.get_button(4) or self.joystick.get_button(5)):
-                    self.Delta['Rotation'] = 0x0
-                if not self.joystick.get_button(1) and not self.joystick.get_button(2) and not self.joystick.get_button(9):
-                    self.Delta['Flag'] = 0x0
-                for event in pygame.event.get():
-                    match event.type:
-                        case pygame.JOYAXISMOTION:
-                            self.Delta['X'] = int(
-                                self.joystick.get_axis(0) * self.Ranges['XY'])
-                            self.Delta['Y'] = - \
-                                int(self.joystick.get_axis(
-                                    1) * self.Ranges['XY'])
-                            self.Delta['Z'] = 0
-                            if self.joystick.get_axis(5) > 0.0:
-                                self.Delta['Z'] += int(self.joystick.get_axis(5)
-                                                       * self.Ranges['Z'])
-                            if self.joystick.get_axis(2) > 0.0:
-                                self.Delta['Z'] -= int(self.joystick.get_axis(2)
-                                                       * self.Ranges['Z'])
-                        case pygame.JOYBUTTONDOWN:
-                            match event.button:
-                                case 1:  # Options button on PS5 controller.
-                                    self.Delta['Flag'] = 0x40
-                                case 2:  # Options button on PS5 controller.
-                                    self.Delta['Flag'] = 0x80
-                                case 9:  # Options button on PS5 controller.
-                                    self.Delta['Flag'] = 0x1
-                                case 4:
-                                    self.Delta['Rotation'] = -0x20
-                                case 5:
-                                    self.Delta['Rotation'] = 0x20
-                                case 6:  # Share button on PS5 controller.
-                                    self.Delta['Flag'] = 0x0
-                                    self.Delta['X'] = 0
-                                    self.Delta['Y'] = 0
-                                    self.Delta['Z'] = -0x80
-                                    self.Delta['Rotation'] = 0x0
-                                    self.killswitch_endtime = time.time() + self.killswitch_dt
+            pygame.event.get()
+            keys = pygame.key.get_pressed()
+
+            if keys[K_d]:
+                self.Delta['X'] = int(self.Ranges['XY'] * self.Const)
+            elif keys[K_a]:
+                self.Delta['X'] = -int(self.Ranges['XY'] * self.Const)
+            else:
+                self.Delta['X'] = 0
+
+            if keys[K_w]:
+                self.Delta['Y'] = int(self.Ranges['XY'] * self.Const)
+            elif keys[K_s]:
+                self.Delta['Y'] = -int(self.Ranges['XY'] * self.Const)
+            else:
+                self.Delta['Y'] = 0
+                
+
+            if keys[K_SPACE]:
+                self.Delta['Z'] = int(self.Const * self.Ranges['Z'])
+            elif keys[K_LSHIFT]:
+                self.Delta['Z'] = -int(self.Const * self.Ranges['Z'])
+            else:
+                self.Delta['Z'] = 0
+
+            
+            self.Delta['Flag'] = 0x0
+            self.Delta['Flag'] |= 0x1 if keys[K_f] else 0x0
+            self.Delta['Flag'] |= 0x40 if keys[K_g] else 0x0
+            self.Delta['Flag'] |= 0x80 if keys[K_h] else 0x0
+
+            if keys[K_LEFT]:
+                self.Delta['Rotation'] = -0x20
+            elif keys[K_RIGHT]:
+                self.Delta['Rotation'] = 0x20
+            else:
+                self.Delta['Rotation'] = 0x0

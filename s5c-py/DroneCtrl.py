@@ -11,13 +11,12 @@ import threading
 import h264decoder
 import cv2
 
-
 Host = '172.17.10.1'
 Ports = {
     'TCP': 8888,
     'UDP': 9125
 }
-
+PreviousDelta = {}
 pygame.init()
 pygame.joystick.init()
 
@@ -34,42 +33,42 @@ while Handler == None:
             Handler = Keyboard()
 
 
-TCP = TCPStream()
-print('[+] Connecting to TCP...')
-TCP.Connect(Host, Ports['TCP'])
-print('[+] Connected to TCP.')
-TCP.Link()
+# TCP = TCPStream()
+# print('[+] Connecting to TCP...')
+# TCP.Connect(Host, Ports['TCP'])
+# print('[+] Connected to TCP.')
+# TCP.Link()
 
-
-UDP = UDPStream()
-print('[+] Connecting to UDP...')
-UDP.Connect(Host, Ports['UDP'])
-print('[+] Connected to UDP.')
-
+# UDP = UDPStream()
+# print('[+] Connecting to UDP...')
+# UDP.Connect(Host, Ports['UDP'])
+# print('[+] Connected to UDP.')
+display = pygame.display.set_mode((300, 300))
 
 def VideoStreamHandler():
     decoder = h264decoder.H264Decoder()
     while True:
-        buffer = TCP.Receive(0x800)
-        if not buffer:
-            continue
+        buffer = TCP.Receive(0x5B4)
         framedata = decoder.decode(buffer)
-        if not framedata:
-            continue
         for frame in framedata:
             (d, w, h, l) = frame
             d = numpy.frombuffer(d, dtype=numpy.ubyte, count=len(d))
             d = d.reshape((h, l//3, 3))
             d = d[:, :w, :]
-            cv2.imshow('win', d)
+            cv2.imshow('Camera View', d)
             cv2.waitKey(1)
-        
 
-VideoThread = threading.Thread(target=VideoStreamHandler, args=())
-Handler.start()
-VideoThread.start()
+try:
+    # VideoThread = threading.Thread(target=VideoStreamHandler, args=())
+    Handler.start()
+    # VideoThread.start()
 
-while True:
-    # print(Handler.GetDelta('Z'))
-    UDP.SendCommand(Handler.GetDelta('Flag'), 0x80 + Handler.GetDelta('X'), 0x80 +
-                    Handler.GetDelta('Y'), 0x80 + Handler.GetDelta('Z'), 0x80 + Handler.GetDelta('Rotation'))
+    while True:
+        Delta = Handler.GetDelta()
+        if list(Delta.values()) != list(PreviousDelta.values()):
+            print(Delta)
+            # UDP.SendCommand(Delta['Flag'], 0x80 + Delta['X'], 0x80 + Delta['Y'], 0x80 + Delta['Z'], 0x80 + Delta['Rotation'])
+        PreviousDelta = Delta
+except KeyboardInterrupt:
+    TCP.Disconnect()
+    UDP.Disconnect()

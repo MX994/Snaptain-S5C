@@ -67,8 +67,7 @@ try:
     while True:
         Delta = Handler.GetDelta()
         if list(Delta.values()) != list(PreviousDelta.values()):
-            print(Delta)
-            # UDP.SendCommand(Delta['Flag'], 0x80 + Delta['X'], 0x80 + Delta['Y'], 0x80 + Delta['Z'], 0x80 + Delta['Rotation'])
+            UDP.SendCommand(Delta['Flag'], 0x80 + Delta['X'], 0x80 + Delta['Y'], 0x80 + Delta['Z'], 0x80 + Delta['Rotation'])
         PreviousDelta = Delta
 except KeyboardInterrupt:
     TCP.Disconnect()

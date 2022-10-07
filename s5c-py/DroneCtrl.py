@@ -60,9 +60,9 @@ def VideoStreamHandler():
             cv2.waitKey(1)
 
 try:
-    # VideoThread = threading.Thread(target=VideoStreamHandler, args=())
+    VideoThread = threading.Thread(target=VideoStreamHandler, args=())
     Handler.start()
-    # VideoThread.start()
+    VideoThread.start()
 
     while True:
         Delta = Handler.GetDelta()

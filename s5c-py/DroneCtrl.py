@@ -33,16 +33,17 @@ while Handler == None:
             Handler = Keyboard()
 
 
-# TCP = TCPStream()
-# print('[+] Connecting to TCP...')
-# TCP.Connect(Host, Ports['TCP'])
-# print('[+] Connected to TCP.')
-# TCP.Link()
+TCP = TCPStream()
+print('[+] Connecting to TCP...')
+TCP.Connect(Host, Ports['TCP'])
+print('[+] Connected to TCP.')
+TCP.Link()
 
-# UDP = UDPStream()
-# print('[+] Connecting to UDP...')
-# UDP.Connect(Host, Ports['UDP'])
-# print('[+] Connected to UDP.')
+UDP = UDPStream()
+print('[+] Connecting to UDP...')
+UDP.Connect(Host, Ports['UDP'])
+print('[+] Connected to UDP.')
+
 display = pygame.display.set_mode((300, 300))
 
 def VideoStreamHandler():
